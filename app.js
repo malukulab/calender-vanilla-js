@@ -2,12 +2,12 @@ window.addEventListener('DOMContentLoaded', () => {
 
   calendar({
     showToday: true,
+    showAnotherDays: false,
     dataEvents: [
       new Date(2021, 1).toLocaleDateString(),
       new Date(2021, 1).toLocaleDateString(),
       new Date(2021, 2).toLocaleDateString()
     ],
-    showNotThisMonth: true,
     headings: {
       days: [
         "Minggu",
@@ -51,14 +51,47 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  /**
+   * Calendar props types.
+   *
+   * @type {calenderProps<{
+   *    showToday: boolean,
+   *    showAnotherDays: boolean,
+   *    dataEvents: string[],
+   *    headings: object<headings>,
+   *    events: object<events>
+   *  }>
+   * }
+   *
+   *
+   * @type {headings<{
+   *    days: string[],
+   *    weekend: string,
+   *    months: string[]
+   *  }>
+   * }
+   *
+   * @type {events<{
+   *    onClick: Function,
+   *    prevOnClick: Function,
+   *    nextOnClick: Function
+   *  }>
+   * }
+   *
+   */
 
-
+  /**
+   * Calendar JS
+   *
+   * @param {calenderProps} props
+   * @retrun {void}
+   */
   function calendar({
     headings,
     currentDate,
     events,
     showToday,
-    showNotThisMonth,
+    showAnotherDays,
     dataEvents
   }) {
     const headingsCalendar = headings;
@@ -74,7 +107,12 @@ window.addEventListener('DOMContentLoaded', () => {
       currentDate || new Date(state.year, state.month + 1, 0), // current month.
     );
 
-
+    /**
+     * Check has sum data event by date.
+     *
+     * @param {Date} date
+     * @return {number}
+     */
     function hasDataEventCount(date) {
       let count = 0;
 
@@ -91,6 +129,7 @@ window.addEventListener('DOMContentLoaded', () => {
      * Build calendar base view.
      *
      * @param {HTMLElement} _view
+     * @return {void}
      */
     function build(_view) {
       const element = el(_view, 0);
@@ -123,6 +162,7 @@ window.addEventListener('DOMContentLoaded', () => {
       }
 
       function render(_currentDate) {
+        console.log(_currentDate);
         const dates = [];
         element.children[1].innerHTML = ''; // clear this content body before rendering.
         const today = new Date();
@@ -139,7 +179,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
         for (let i = 1; i <= totalDaysInPrevMonth; i++) {
           dates.push({
-            day: showNotThisMonth ? i : '',
+            day: showAnotherDays ? i : '',
             date: new Date(currentInYear, (currentInMonth - 1), i),
             thisMonthClass: 'not-current__month',
             isToday: false
@@ -161,12 +201,13 @@ window.addEventListener('DOMContentLoaded', () => {
           });
         }
 
-        const totalDaysInNextMonth = 42 - dates.length; // num of calendar grids (td).
-        const totalRows = Math.ceil(dates.length / 7);
+        // num of calendar grids (42) (td).
+        const totalDaysInNextMonth = 42 - dates.length;
+        const totalRows = 42 / 7;
 
         for (let i = 1; i <= totalDaysInNextMonth; i++) {
           dates.push({
-            day: showNotThisMonth ? i : '',
+            day: showAnotherDays ? i : '',
             date: new Date(currentInYear, currentInMonth + 1, i),
             thisMonthClass: 'not-current__month',
             isToday: false
@@ -185,11 +226,16 @@ window.addEventListener('DOMContentLoaded', () => {
           }
 
           const count = hasDataEventCount(date);
-          if (count > 0) {
+          if (count > 0 && showAnotherDays) {
             tdElement.setAttribute('calendar-event-count', count > 99 ? '99+' : count + 1);
           }
 
           if ('onClick' in events) {
+
+            if (!showAnotherDays && date.getMonth() !== currentInMonth) {
+              return tdElement;
+            }
+
             tdElement.addEventListener('click', () => events.onClick(date));
           }
 
@@ -200,7 +246,7 @@ window.addEventListener('DOMContentLoaded', () => {
           const trElement = createElement('tr');
 
           for (let j = 0; j < 7; j++) {
-            trElement.insertAdjacentElement('beforeend', tdElements.shift());
+            trElement.insertAdjacentElement('beforeend', tdElements.shift()); // queue mutable elements.
           }
 
           element.children[1].insertAdjacentElement('beforeend', trElement);
@@ -228,10 +274,10 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 
     el('button[calendar-btn-next]', 0)?.addEventListener('click', () => {
-      const date = new Date(state.year, state.month + 2, 0);
+      const date = new Date(state.year, (state.month + 2), 0);
       state.month = date.getMonth();
       state.year = date.getFullYear();
-
+      console.log(date);
       view.render(
         date
       );
@@ -241,11 +287,22 @@ window.addEventListener('DOMContentLoaded', () => {
 
   }
 
-
+  /**
+   * Append parent element.
+   *
+   * @param {HTMLElement} parent
+   * @param {Function || string} callback
+   */
   function append(parent, callback) {
     parent.innerHTML = typeof callback === 'function' ? callback() : callback;
   }
 
+  /**
+   * Get element last of first children.
+   *
+   * @param {HTMLElement} element
+   * @return {HTMLElement}
+   */
   function getLastChildren(element) {
     if (element.children.length === 0) return element;
 
@@ -255,6 +312,12 @@ window.addEventListener('DOMContentLoaded', () => {
     return child;
   }
 
+  /**
+   * Chaining condition statements.
+   *
+   * @param {boolean} statment
+   * @return {boolean}
+   */
   function equal(statment) {
     const result = [];
 
@@ -268,6 +331,13 @@ window.addEventListener('DOMContentLoaded', () => {
     }(statment);
   }
 
+  /**
+   * Find element by selector.
+   *
+   * @param {string} sel
+   * @param {number} index
+   * @return {HTMLElement || HTMLElement[]}
+   */
   function el(sel, index) {
     const elements = document.querySelectorAll(sel);
 
@@ -284,34 +354,14 @@ window.addEventListener('DOMContentLoaded', () => {
     return elements[0];
   }
 
+  /**
+   * Create dom element.
+   *
+   * @param {string} element
+   * @return {HTMLElement}
+   */
   function createElement(element) {
     return document.createElement(element);
   }
-
-  // function hasEqualDate(dates, date) {
-  //   if (!Array.isArray(dates)) {
-  //     console.log(dates);
-  //     return (dates.getMonth() === date.getMonth())
-  //       && (dates.getYear() === date.getYear())
-  //       && (dates.getDay() === date.getDay());
-  //   }
-
-  //   function* forEachGenerator(_dates) {
-  //     yield* _dates;
-  //   }
-
-  //   const has = forEachGenerator(dates);
-  //   console.log('d');
-  //   console.log(dates);
-  //   // console.log(has.next().done);
-  //   // console.log(has.next().done);
-  //   // while (!has.next().done) {
-  //   //   const value = has.next().value;
-  //   //   console.log(value);
-  //   //   if (hasEqualDate(value, date)) return true;
-  //   // }
-
-  //   return false;
-  // }
 
 });
