@@ -2,7 +2,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   calendar({
     showToday: true,
-    showAnotherDays: false,
+    showAnotherDays: true,
     dataEvents: [
       new Date(2021, 1).toLocaleDateString(),
       new Date(2021, 1).toLocaleDateString(),
@@ -162,7 +162,6 @@ window.addEventListener('DOMContentLoaded', () => {
       }
 
       function render(_currentDate) {
-        console.log(_currentDate);
         const dates = [];
         element.children[1].innerHTML = ''; // clear this content body before rendering.
         const today = new Date();
@@ -230,12 +229,9 @@ window.addEventListener('DOMContentLoaded', () => {
             tdElement.setAttribute('calendar-event-count', count > 99 ? '99+' : count + 1);
           }
 
+          if (!showAnotherDays && date.getMonth() !== currentInMonth) return tdElement;
+
           if ('onClick' in events) {
-
-            if (!showAnotherDays && date.getMonth() !== currentInMonth) {
-              return tdElement;
-            }
-
             tdElement.addEventListener('click', () => events.onClick(date));
           }
 
