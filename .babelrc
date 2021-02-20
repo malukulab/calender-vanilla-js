@@ -1,0 +1,16 @@
+{
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "targets": {
+          "esmodules": false
+        },
+        "modules": "commonjs"
+      }
+    ],
+    "minify"
+  ],
+
+  "comments": false
+}
