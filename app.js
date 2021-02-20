@@ -128,8 +128,11 @@ window.addEventListener('DOMContentLoaded', () => {
     /**
      * Build calendar base view.
      *
-     * @param {HTMLElement} _view
-     * @return {void}
+     * @param {HTMLElement} view
+     * @return {object<
+     *	heading: Function,
+     *  render : Function
+     * >}
      */
     function build(_view) {
       const element = el(_view, 0);
