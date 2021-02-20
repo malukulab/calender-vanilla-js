@@ -226,7 +226,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
           const count = hasDataEventCount(date);
           if (count > 0 && showAnotherDays) {
-            tdElement.setAttribute('calendar-event-count', count > 99 ? '99+' : count + 1);
+            tdElement.setAttribute('calendar-event-count', count > 99 ? '99+' : count);
           }
 
           if (!showAnotherDays && date.getMonth() !== currentInMonth) return tdElement;
